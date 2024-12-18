@@ -1,15 +1,17 @@
-import {RegisterPage} from "../pages/register.page";
-import { HomePage } from '../pages/home.page';
-import {AccountPage} from "../pages/account.page";
-import {LoginPage} from "../pages/login.page";
-import {FundTransferPage} from "../pages/fundTransfer.page";
-import {BillPayPage} from "../pages/billpay.page";
+import {RegisterPage} from '../pages/register.page';
+import {HomePage} from '../pages/home.page';
+import {AccountPage} from '../pages/account.page';
+import {LoginPage} from '../pages/login.page';
+import {FundTransferPage} from '../pages/fundTransfer.page';
+import {BillPayPage} from '../pages/billpay.page';
+import {FindTransactionPage} from '../pages/findTransaction.page';
 
-const { test, expect } = require('@playwright/test');
+const { test } = require('@playwright/test');
 
 const username = 'john_doe' + Math.floor(Math.random() * 1000);
 const password = 'password';
-const billPayAmount = '20.00';
+const payeeName = 'Mike';
+const billPayAmount = '34.58';
 let firstAccountNo, secondAccountNo;
 
 const homePage = new HomePage();
@@ -17,7 +19,8 @@ const registerPage = new RegisterPage();
 const accountPage = new AccountPage();
 const loginPage = new LoginPage();
 const fundTransferPage = new FundTransferPage();
-const billPay = new BillPayPage();
+const billPayPage = new BillPayPage();
+const findTransactionPage = new FindTransactionPage();
 
 
 test('Parabank E2E Test', async ({ page, request }) => {
@@ -34,19 +37,7 @@ test('Parabank E2E Test', async ({ page, request }) => {
     await accountPage.openNewAccount(page, firstAccountNo);
     secondAccountNo = await accountPage.getNewAccountNumber(page);
     await fundTransferPage.transferFunds(page, '100', secondAccountNo, firstAccountNo);
-    await billPay.payBill(page, billPayAmount, secondAccountNo);
-    const cookies = await page.context().cookies();
-    const response = await request.get(`https://parabank.parasoft.com/parabank/services_proxy/bank/accounts/${secondAccountNo}/transactions/amount/20?timeout=30000`, {
-        headers: {
-            'Cookie': cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; '),
-        }
-    });
-    const responseBody = await response.json();
-    console.log(responseBody);
-    expect(response.status()).toBe(200);
-    expect(responseBody[0].accountId).toBe(parseInt(secondAccountNo));
-    expect(responseBody[0].type).toBe('Debit');
-    expect(responseBody[0].amount).toBe(20);
-    expect(responseBody[0].description).toBe('Bill Payment to Mike');
+    await billPayPage.payBill(page, billPayAmount, secondAccountNo, payeeName);
+    await findTransactionPage.findTransactionByAmount(page, request, secondAccountNo, billPayAmount, payeeName);
 
 });
