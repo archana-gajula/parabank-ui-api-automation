@@ -1,33 +1,23 @@
-const { test, expect } = require('@playwright/test');
+import {RegisterPage} from "../pages/register.page";
 import { HomePage } from '../pages/home.page';
 
-const username = Math.random().toString(36).substring(7);
+const { test, expect } = require('@playwright/test');
+
+const username = 'john_doe' + Math.floor(Math.random() * 1000);
 const password = 'password';
 const billPayAmount = '20.00';
 let firstAccountNo, secondAccountNo;
 
 const homePage = new HomePage();
+const registerPage = new RegisterPage();
 
 
 test('Parabank E2E Test', async ({ page, request }) => {
 
     await homePage.goto(page);
     await homePage.navigateToRegister(page);
-
-    await page.locator("[name='customer.firstName']").fill('John');
-    await page.locator("[name='customer.lastName']").fill('Doe');
-    await page.locator("[name='customer.address.street']").fill('123 Street');
-    await page.locator("[name='customer.address.city']").fill('AnyCity');
-    await page.locator("[name='customer.address.state']").fill('AnyState');
-    await page.locator("[name='customer.address.zipCode']").fill('123456');
-    await page.locator("[name='customer.phoneNumber']").fill('9876543210');
-    await page.locator("[name='customer.ssn']").fill('123456789');
-    await page.locator("[name='customer.username']").fill(username);
-    await page.locator("[name='customer.password']").fill('password');
-    await page.locator("[name='repeatedPassword']").fill('password');
-    await page.getByRole('button', { name: 'Register' }).click();
-    await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/register.htm');
-    await expect(page.locator("[id='rightPanel']")).toContainText('Your account was created successfully. You are now logged in.');
+    await registerPage.registerUser(page, username, password);
+    await registerPage.verifyRegistrationSuccess(page);
     // logout
     await page.getByRole('link', { name: 'Log Out' }).click();
     // login
