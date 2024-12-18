@@ -1,5 +1,7 @@
 import {RegisterPage} from "../pages/register.page";
 import { HomePage } from '../pages/home.page';
+import {AccountPage} from "../pages/account.page";
+import {LoginPage} from "../pages/login.page";
 
 const { test, expect } = require('@playwright/test');
 
@@ -10,6 +12,8 @@ let firstAccountNo, secondAccountNo;
 
 const homePage = new HomePage();
 const registerPage = new RegisterPage();
+const accountPage = new AccountPage();
+const loginPage = new LoginPage();
 
 
 test('Parabank E2E Test', async ({ page, request }) => {
@@ -18,18 +22,11 @@ test('Parabank E2E Test', async ({ page, request }) => {
     await homePage.navigateToRegister(page);
     await registerPage.registerUser(page, username, password);
     await registerPage.verifyRegistrationSuccess(page);
-    // logout
-    await page.getByRole('link', { name: 'Log Out' }).click();
-    // login
-    await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/index.htm?ConnType=JDBC');
-    await page.locator("[name='username']").fill(username);
-    await page.locator("[name='password']").fill('password');
-    await page.getByRole('button', { name: 'Log In' }).click();
-    await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/overview.htm');
-    await expect(page.locator("[id='rightPanel']")).toContainText('Accounts Overview');
-    await page.waitForSelector("[id='accountTable']");
-    firstAccountNo = await page.locator("[id='accountTable']").locator('tbody').locator('tr').nth(0).locator('td').nth(0).textContent();
-    console.log(firstAccountNo);
+    await homePage.logout(page);
+    await loginPage.login(page, username, password);
+    await accountPage.verifyAccountsOverview(page);
+    firstAccountNo = await accountPage.getFirstAccountNumber(page);
+
     // verify global navigation
     await page.locator("[class='home']").locator("[href='index.htm']").click();
     await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/index.htm');
