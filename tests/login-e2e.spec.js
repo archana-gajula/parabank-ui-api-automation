@@ -2,6 +2,8 @@ import {RegisterPage} from "../pages/register.page";
 import { HomePage } from '../pages/home.page';
 import {AccountPage} from "../pages/account.page";
 import {LoginPage} from "../pages/login.page";
+import {FundTransferPage} from "../pages/fundTransfer.page";
+import {BillPayPage} from "../pages/billpay.page";
 
 const { test, expect } = require('@playwright/test');
 
@@ -14,6 +16,8 @@ const homePage = new HomePage();
 const registerPage = new RegisterPage();
 const accountPage = new AccountPage();
 const loginPage = new LoginPage();
+const fundTransferPage = new FundTransferPage();
+const billPay = new BillPayPage();
 
 
 test('Parabank E2E Test', async ({ page, request }) => {
@@ -26,56 +30,11 @@ test('Parabank E2E Test', async ({ page, request }) => {
     await loginPage.login(page, username, password);
     await accountPage.verifyAccountsOverview(page);
     firstAccountNo = await accountPage.getFirstAccountNumber(page);
-
-    // verify global navigation
-    await page.locator("[class='home']").locator("[href='index.htm']").click();
-    await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/index.htm');
-    await page.locator("[class='aboutus']").locator("[href='about.htm']").click();
-    await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/about.htm');
-    await page.locator("[class='contact']").locator("[href='contact.htm']").click();
-    await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/contact.htm');
-    // create new account
-    await page.getByRole('link', { name: 'Open New Account' }).click();
-    await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/openaccount.htm');
-    await page.locator("[id='type']").selectOption('SAVINGS');
-    await page.locator("[id='fromAccountId']").selectOption(firstAccountNo);
-    await page.getByRole('button', { name: 'Open New Account' }).click();
-    await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/openaccount.htm');
-    await expect(page.locator("[id='rightPanel']")).toContainText('Congratulations, your account is now open.');
-    await expect(page.locator("[id='openAccountResult']")).toContainText('Your new account number: ');
-    await page.waitForSelector("[id='newAccountId']");
-    secondAccountNo = await page.locator("[id='newAccountId']").textContent();
-    console.log(secondAccountNo);
-    // transfer funds
-    await page.getByRole('link', { name: 'Transfer Funds' }).click();
-    await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/transfer.htm');
-    await page.locator("[id='amount']").fill('100');
-    await page.locator("[id='fromAccountId']").selectOption(secondAccountNo);
-    await page.locator("[id='toAccountId']").selectOption(firstAccountNo);
-    await page.getByRole('button', { name: 'Transfer' }).click();
-    await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/transfer.htm');
-    await page.waitForSelector("[id='showResult']");
-    await expect(page.locator("[id='rightPanel']")).toContainText('Transfer Complete!');
-    // bill pay
-    await page.getByRole('link', { name: 'Bill Pay' }).click();
-    await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/billpay.htm');
-    await page.locator("[name='payee.name']").fill('Mike');
-    await page.locator("[name='payee.address.street']").fill('123 Street');
-    await page.locator("[name='payee.address.city']").fill('AnyCity');
-    await page.locator("[name='payee.address.state']").fill('AnyState');
-    await page.locator("[name='payee.address.zipCode']").fill('123456');
-    await page.locator("[name='payee.phoneNumber']").fill('9876543210');
-    await page.locator("[name='payee.accountNumber']").fill('123456789');
-    await page.locator("[name='verifyAccount']").fill('123456789');
-    await page.locator("[name='amount']").fill(billPayAmount);
-    await page.locator("[name='fromAccountId']").selectOption(secondAccountNo);
-    await page.waitForTimeout(2000);
-    await page.getByRole('button', { name: "Send Payment" }).click();
-    await page.waitForTimeout(2000);
-    await page.waitForSelector("[id='billpayResult']");
-    await expect(page.locator("[id='billpayResult']").locator('h1')).toContainText('Bill Payment Complete');
-    await expect(page.locator("[id='billpayResult']").locator('p').nth(0)).toContainText(`Bill Payment to Mike in the amount of $${billPayAmount} from account ${secondAccountNo} was successful.`);
-
+    await homePage.verifyGlobalNavigation(page);
+    await accountPage.openNewAccount(page, firstAccountNo);
+    secondAccountNo = await accountPage.getNewAccountNumber(page);
+    await fundTransferPage.transferFunds(page, '100', secondAccountNo, firstAccountNo);
+    await billPay.payBill(page, billPayAmount, secondAccountNo);
     const cookies = await page.context().cookies();
     const response = await request.get(`https://parabank.parasoft.com/parabank/services_proxy/bank/accounts/${secondAccountNo}/transactions/amount/20?timeout=30000`, {
         headers: {
