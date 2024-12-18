@@ -1,14 +1,19 @@
 const { test, expect } = require('@playwright/test');
-const {request} = require("node:http");
-const exp = require("node:constants");
+import { HomePage } from '../pages/home.page';
+
 const username = Math.random().toString(36).substring(7);
-let firstAccountNo, secondAccountNo;
+const password = 'password';
 const billPayAmount = '20.00';
+let firstAccountNo, secondAccountNo;
+
+const homePage = new HomePage();
+
 
 test('Parabank E2E Test', async ({ page, request }) => {
-    await page.goto('https://parabank.parasoft.com/parabank/');
-    await page.getByRole('link', { name: 'Register' }).click();
-    await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/register.htm');
+
+    await homePage.goto(page);
+    await homePage.navigateToRegister(page);
+
     await page.locator("[name='customer.firstName']").fill('John');
     await page.locator("[name='customer.lastName']").fill('Doe');
     await page.locator("[name='customer.address.street']").fill('123 Street');
@@ -84,8 +89,7 @@ test('Parabank E2E Test', async ({ page, request }) => {
     await expect(page.locator("[id='billpayResult']").locator('h1')).toContainText('Bill Payment Complete');
     await expect(page.locator("[id='billpayResult']").locator('p').nth(0)).toContainText(`Bill Payment to Mike in the amount of $${billPayAmount} from account ${secondAccountNo} was successful.`);
 
-    // Find transaction by amount using api call
-    let cookies = await page.context().cookies();
+    const cookies = await page.context().cookies();
     const response = await request.get(`https://parabank.parasoft.com/parabank/services_proxy/bank/accounts/${secondAccountNo}/transactions/amount/20?timeout=30000`, {
         headers: {
             'Cookie': cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; '),

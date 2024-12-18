@@ -1,7 +1,6 @@
 # parabank-ui-api-automation
 
-This repository contains end-to-end tests for [Parabank](https://parabank.parasoft.com/ 
-) Application's UI and API using Playwright.
+This repository contains end-to-end tests for [Parabank](https://parabank.parasoft.com/) Application's UI and API using Playwright.
 
 ## Prerequisites
 
@@ -17,7 +16,7 @@ This repository contains end-to-end tests for [Parabank](https://parabank.paraso
     ```bash
     npm install
     ```
-   
+
 ## Running the tests
 1.  **Run the tests:**
     ```bash
