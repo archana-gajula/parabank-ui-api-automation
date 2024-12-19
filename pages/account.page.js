@@ -18,7 +18,7 @@ export class AccountPage {
         await page.locator("[id='type']").selectOption('SAVINGS');
         await page.locator("[id='fromAccountId']").selectOption(fromAccountNo);
         await page.getByRole('button', { name: 'Open New Account' }).click();
-        await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/openaccount.htm');
+        await expect(page).toHaveURL(URLs.openAccount);
         await expect(page.locator("[id='rightPanel']")).toContainText('Congratulations, your account is now open.');
         await expect(page.locator("[id='openAccountResult']")).toContainText('Your new account number: ');
     }
