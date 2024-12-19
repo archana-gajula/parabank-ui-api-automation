@@ -1,4 +1,5 @@
 import {expect} from "@playwright/test";
+import { URLs } from "../config";
 
 export class AccountPage {
 
@@ -13,7 +14,7 @@ export class AccountPage {
 
     async openNewAccount(page, fromAccountNo) {
         await page.getByRole('link', { name: 'Open New Account' }).click();
-        await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/openaccount.htm');
+        await expect(page).toHaveURL(URLs.openAccount);
         await page.locator("[id='type']").selectOption('SAVINGS');
         await page.locator("[id='fromAccountId']").selectOption(fromAccountNo);
         await page.getByRole('button', { name: 'Open New Account' }).click();
@@ -25,17 +26,5 @@ export class AccountPage {
     async getNewAccountNumber(page) {
         await page.waitForSelector("[id='newAccountId']");
         return await page.locator("[id='newAccountId']").textContent();
-    }
-
-    async transferFunds(page, amount, fromAccountNo, toAccountNo) {
-        await page.getByRole('link', { name: 'Transfer Funds' }).click();
-        await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/transfer.htm');
-        await page.locator("[id='amount']").fill(amount);
-        await page.locator("[id='fromAccountId']").selectOption(fromAccountNo);
-        await page.locator("[id='toAccountId']").selectOption(toAccountNo);
-        await page.getByRole('button', { name: 'Transfer' }).click();
-        await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/transfer.htm');
-        await page.waitForSelector("[id='showResult']");
-        await expect(page.locator("[id='rightPanel']")).toContainText('Transfer Complete!');
     }
 }

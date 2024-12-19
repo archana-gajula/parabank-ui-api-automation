@@ -1,10 +1,11 @@
 import {expect} from "@playwright/test";
+import { URLs } from "../config";
 
 export class BillPayPage {
 
     async payBill(page, billPayAmount, fromAccount, payeeName) {
         await page.getByRole('link', { name: 'Bill Pay' }).click();
-        await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/billpay.htm');
+        await expect(page).toHaveURL(URLs.billPay);
         await page.locator("[name='payee.name']").fill(payeeName);
         await page.locator("[name='payee.address.street']").fill('123 Street');
         await page.locator("[name='payee.address.city']").fill('AnyCity');

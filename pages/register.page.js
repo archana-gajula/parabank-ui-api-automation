@@ -1,4 +1,5 @@
 import {expect} from "@playwright/test";
+import { URLs } from "../config";
 
 export class RegisterPage {
 
@@ -19,7 +20,7 @@ export class RegisterPage {
     }
 
     async verifyRegistrationSuccess(page) {
-        await expect(page).toHaveURL('https://parabank.parasoft.com/parabank/register.htm');
+        await expect(page).toHaveURL(URLs.register);
         await expect(page.locator("[id='rightPanel']")).toContainText('Your account was created successfully. You are now logged in.');
     }
 }
