@@ -8,6 +8,7 @@ pipeline {
         stage('test run') {
             steps {
                 sh 'npm install'
+                sh 'npx playwright test'
             }
         }
     }
